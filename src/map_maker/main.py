@@ -3,7 +3,7 @@ import sys
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 640
-SCREEN_HEIGHT = 720  # Increased height to accommodate the color palette
+SCREEN_HEIGHT = 800
 
 # Define constants for the different colors
 COLOR_BLACK = (0, 0, 0)
@@ -23,6 +23,10 @@ map_grid = [[COLOR_WHITE for _ in range(SCREEN_HEIGHT // CELL_SIZE - 1)] for _ i
 # Set the initially selected color
 selected_color = COLOR_WHITE
 
+# Define the Save button
+SAVE_BUTTON = pygame.Rect(SCREEN_WIDTH - CELL_SIZE * 4, SCREEN_HEIGHT - CELL_SIZE, CELL_SIZE * 4, CELL_SIZE)
+
+
 def draw_map(screen, map_grid):
     for i, row in enumerate(map_grid):
         for j, color in enumerate(row):
@@ -31,6 +35,22 @@ def draw_map(screen, map_grid):
 def draw_palette(screen):
     for i, color in enumerate(PALETTE):
         pygame.draw.rect(screen, color, pygame.Rect(i * CELL_SIZE * 2, SCREEN_HEIGHT - CELL_SIZE, CELL_SIZE * 2, CELL_SIZE))
+
+def draw_button(screen, button, text):
+    pygame.draw.rect(screen, COLOR_BLACK, button)
+    font = pygame.font.Font(None, 24)
+    label = font.render(text, True, COLOR_WHITE)
+    screen.blit(label, (button.x + 5, button.y + 5))
+
+def save_map(map_grid):
+    image = Image.new('RGBA', (len(map_grid), len(map_grid[0])))
+    pixels = image.load()
+
+    for i, row in enumerate(map_grid):
+        for j, color in enumerate(row):
+            pixels[i, j] = color
+
+    image.save('map.png')
 
 def main():
     pygame.init()
@@ -52,10 +72,15 @@ def main():
 
                 # If the user clicked on the palette
                 if y >= SCREEN_HEIGHT - CELL_SIZE:
-                    selected_color = PALETTE[x // (CELL_SIZE * 2)]
+                    # If the user clicked on the Save button
+                    if SAVE_BUTTON.collidepoint(x, y):
+                        save_map(map_grid)
+                    else:
+                        selected_color = PALETTE[x // (CELL_SIZE * 2)]
                 else:
                     # Change the color of the cell that the user clicked on
                     map_grid[x // CELL_SIZE][y // CELL_SIZE] = selected_color
+
 
         # Check if the mouse button is currently being pressed
         if pygame.mouse.get_pressed()[0]:
@@ -72,6 +97,10 @@ def main():
 
         # Draw the color palette
         draw_palette(screen)
+
+        # Draw the save button
+        draw_button(screen, SAVE_BUTTON, "SAVE")
+
 
         pygame.display.flip()
 
