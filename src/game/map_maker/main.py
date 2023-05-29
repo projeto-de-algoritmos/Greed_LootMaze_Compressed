@@ -1,5 +1,10 @@
+import os
 import pygame
 import sys
+import bitarray
+from PIL import Image
+
+from src.game.huffman import huffman_encode
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 640
@@ -27,6 +32,9 @@ selected_color = COLOR_WHITE
 SAVE_BUTTON = pygame.Rect(SCREEN_WIDTH - CELL_SIZE * 4, SCREEN_HEIGHT - CELL_SIZE, CELL_SIZE * 4, CELL_SIZE)
 
 
+SAVE_FILE_NAME = 'map.bin'
+
+
 def draw_map(screen, map_grid):
     for i, row in enumerate(map_grid):
         for j, color in enumerate(row):
@@ -43,6 +51,7 @@ def draw_button(screen, button, text):
     screen.blit(label, (button.x + 5, button.y + 5))
 
 def save_map(map_grid):
+    global running
     image = Image.new('RGBA', (len(map_grid), len(map_grid[0])))
     pixels = image.load()
 
@@ -50,15 +59,22 @@ def save_map(map_grid):
         for j, color in enumerate(row):
             pixels[i, j] = color
 
-    image.save('map.png')
+    image.save('temp-map.png')
+
+    huffman_encode('temp-map.png', SAVE_FILE_NAME)
+
+    os.remove('temp-map.png')
+
+    running = False
 
 def main():
     pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    running = True
+    global running
     global selected_color
+    running = True
 
     while running:
         for event in pygame.event.get():
