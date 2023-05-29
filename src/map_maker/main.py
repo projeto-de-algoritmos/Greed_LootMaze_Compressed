@@ -57,6 +57,16 @@ def main():
                     # Change the color of the cell that the user clicked on
                     map_grid[x // CELL_SIZE][y // CELL_SIZE] = selected_color
 
+        # Check if the mouse button is currently being pressed
+        if pygame.mouse.get_pressed()[0]:
+            # Get the position of the mouse
+            x, y = pygame.mouse.get_pos()
+
+            # If the mouse is not over the palette
+            if y < SCREEN_HEIGHT - CELL_SIZE:
+                # Change the color of the cell that the mouse is over
+                map_grid[x // CELL_SIZE][y // CELL_SIZE] = selected_color
+
         # Draw the map
         draw_map(screen, map_grid)
 
