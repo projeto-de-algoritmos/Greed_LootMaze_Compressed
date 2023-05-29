@@ -4,6 +4,7 @@ import sys
 import bitarray
 from PIL import Image
 
+from src.config import MAP_ASSETS_DIR
 from src.game.huffman import huffman_encode
 
 # Define constants for the screen width and height
@@ -32,7 +33,7 @@ selected_color = COLOR_WHITE
 SAVE_BUTTON = pygame.Rect(SCREEN_WIDTH - CELL_SIZE * 4, SCREEN_HEIGHT - CELL_SIZE, CELL_SIZE * 4, CELL_SIZE)
 
 
-SAVE_FILE_NAME = 'map.bin'
+SAVE_FILE_NAME = ''.join([MAP_ASSETS_DIR, '/map.bin'])
 
 
 def draw_map(screen, map_grid):
