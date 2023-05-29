@@ -14,6 +14,7 @@ from src.game.path_algorithm.DFS import DFS
 from src.game.game_scene import GameScene
 from src.game.menu import Menu
 
+from src.game.huffman.main import huffman_decode
 
 def handle_mouse_click():
     global goal, grid
@@ -30,6 +31,9 @@ def main():
     parser = argparse.ArgumentParser(description="Grid game")
     parser.add_argument("map_file", help="Path to the map file")
     args = parser.parse_args()
+
+    # Decompress maps
+    huffman_decode(str(args.map_file), "map.png")
 
     # Initialize Pygame
     pygame.init()
