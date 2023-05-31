@@ -5,7 +5,8 @@ import bitarray
 from PIL import Image
 
 from src.config import MAP_ASSETS_DIR
-from src.game.huffman import huffman_encode
+
+from src.game.huffman.main import compress_map_assets
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 640
@@ -60,11 +61,12 @@ def save_map(map_grid):
         for j, color in enumerate(row):
             pixels[i, j] = color
 
-    image.save('temp-map.png')
+    image.save(os.path.join(MAP_ASSETS_DIR, 'new_map.png'))
 
-    huffman_encode('temp-map.png', SAVE_FILE_NAME)
+    compress_map_assets()
 
-    os.remove('temp-map.png')
+    print('Deleting map file...')
+    os.remove(os.path.join(MAP_ASSETS_DIR, 'new_map.png'))
 
     running = False
 
