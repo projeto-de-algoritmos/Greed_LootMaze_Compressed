@@ -1,1 +1,4 @@
 pygame
+Pillow
+bitarray
+numpy
