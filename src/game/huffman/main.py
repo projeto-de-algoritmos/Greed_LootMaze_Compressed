@@ -119,7 +119,7 @@ def compress_map_assets():
             # Save the compressed string
             with open(os.path.join(MAP_ASSETS_DIR, f"compressed_{map_name.replace('.png', '')}"), 'wb') as f:
                 f.write(image_string.encode('utf-8'))
-                
+
 
 def decompress_map(map_name):
     """
@@ -134,10 +134,9 @@ def decompress_map(map_name):
     with open(os.path.join(MAP_ASSETS_DIR, f"compressed_{map_name.replace('.png', '')}"), 'rb') as f:
         compressed_string = f.read()
 
-    string_to_image(compressed_string.decode('utf-8'), huffman_dict, os.path.join(MAP_ASSETS_DIR, f'a_decompressed_{map_name}'))
+    string_to_image(compressed_string.decode('utf-8'), huffman_dict, os.path.join(MAP_ASSETS_DIR, f'{map_name}'))
 
 
 
 if __name__ == '__main__':
-    #compress_map_assets()
-    decompress_map('map_2.png')
+    compress_map_assets()
