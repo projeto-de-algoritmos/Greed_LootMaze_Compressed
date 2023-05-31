@@ -1,7 +1,7 @@
-# LootMaze
+# LootMaze Compressed
 
-**Número da Lista**: 50<br>
-**Conteúdo da Disciplina**: Grafos2<br>
+**Número da Lista**: 29<br>
+**Conteúdo da Disciplina**: Greed<br>
 
 ## Alunos
 |Matrícula | Aluno |
@@ -11,10 +11,18 @@
 
 ## Video
 
-Apresentação - https://youtu.be/05z4xke4N98
+Apresentação - TBD
+
+
+## 💡 Atenção!!!!
+
+A implementação do código de huffman para comprimir uma imagem PNG foi feita apenas para questões experimentais.
+A "compressão" ocupa mais espaço que os arquivos originais.
 
 ## Sobre 
+
 Um jogo onde um mago encontra o menor caminho entre seu spawn e o objetivo usando multiplos algoritmos...
+Porém os mapas foram "Comprimidos" usando Código de Huffman.
 
 Três algoritmos são executados em cada fase do jogo, gerando estatísticas de execução.
 Os algoritmos são:
@@ -23,7 +31,7 @@ Os algoritmos são:
   - Dijkstra
   - DFS
 
-O jogo lê os dados do mapa a partir de arquivos png, sendo possível adicionar novos mapas.
+O jogo lê os dados do mapa a partir de arquivos binários que são arquivos PNG codificados, sendo possível adicionar novos mapas.
 
 ## Screenshots
 ![image](https://github.com/projeto-de-algoritmos/Grafos2_LootMaze/assets/40258400/91eea1d6-d9ba-4162-b91f-ec66a7660485)
@@ -77,7 +85,14 @@ python -m src.game.main map_3.png
 
 ### Adicionar novos mapas
 
-Para adicionar novos mapas, é só adicionar uma imagem png em ```src/assets/maps```
+O seguinte comando irá abrir um editor de mapa.
+
+```sh
+python -m src.game.map_maker.main
+```
+
+Para adicionar novos mapas, é só adicionar uma imagem png em ```src/assets/maps```,
+comprimir a imagem executando `python -m src.game.huffman.main` e
 E executar o programa com o nome do arquivo adicionado.
 
 > Recomenda-se uma imagem de 32x32 pixels.
