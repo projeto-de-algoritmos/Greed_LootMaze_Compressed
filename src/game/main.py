@@ -60,6 +60,7 @@ def main():
             game_scene.run(map_file=args.map_file + '.png')
     finally:
         # delete map file
+        print('Deleting map file...')
         os.remove(os.path.join(MAP_ASSETS_DIR, f'{args.map_file}') + '.png')
 
 if __name__ == "__main__":
