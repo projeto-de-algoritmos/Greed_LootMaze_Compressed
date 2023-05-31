@@ -11,7 +11,7 @@
 
 ## Video
 
-Apresentação - TBD
+Apresentação - https://youtu.be/lZwX_OYJVIM
 
 
 ## 💡 Atenção!!!!
