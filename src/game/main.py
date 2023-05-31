@@ -1,4 +1,3 @@
-from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
 import pygame
 import sys
 import random
@@ -15,6 +14,9 @@ from src.game.game_scene import GameScene
 from src.game.menu import Menu
 
 from src.game.huffman.main import huffman_decode
+
+from src.config import MAP_ASSETS_DIR
+from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
 
 def handle_mouse_click():
     global goal, grid
@@ -33,7 +35,7 @@ def main():
     args = parser.parse_args()
 
     # Decompress maps
-    huffman_decode(str(args.map_file), "map.png")
+    huffman_decode(MAP_ASSETS_DIR + '/' + str(args.map_file), MAP_ASSETS_DIR + '/' + "map.png")
 
     # Initialize Pygame
     pygame.init()

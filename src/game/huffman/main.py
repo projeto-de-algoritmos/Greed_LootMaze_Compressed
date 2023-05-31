@@ -1,127 +1,102 @@
+import pickle
 import os
 from PIL import Image
 from collections import Counter
 from queue import PriorityQueue
 import bitarray
+import numpy as np
+import heapq
+from PIL import Image
 
 from src.config import MAP_ASSETS_DIR
 from src.config import SPRITES_DIR
 
+
+import heapq
+import pickle
+from collections import defaultdict
+from PIL import Image
+
+# RGB color to char mapping
+color_to_char_map = {
+    (0, 0, 0): '0',  # black
+    (255, 255, 255): '1',  # white
+    (0, 0, 255): '2',  # blue
+    (0, 255, 0): '3'   # green
+}
+
+# Char to RGB color mapping
+char_to_color_map = {v: k for k, v in color_to_char_map.items()}
+
+# Huffman tree node class
 class Node:
-    def __init__(self, freq, symbol, left=None, right=None):
+    def __init__(self, char, freq, left=None, right=None):
+        self.char = char
         self.freq = freq
-        self.symbol = symbol
         self.left = left
         self.right = right
 
     def __lt__(self, other):
         return self.freq < other.freq
 
+def build_huffman_tree(string):
+    frequency = defaultdict(int)
+    for char in string:
+        frequency[char] += 1
 
-def calc_freq(filename):
-    img = Image.open(filename)
-    pixels = img.load()
+    heap = [Node(char, freq) for char, freq in frequency.items()]
+    heapq.heapify(heap)
 
-    counter = Counter()
-    for i in range(img.size[0]):
-        for j in range(img.size[1]):
-            pixel = pixels[i, j]
-            counter[pixel] += 1
+    while len(heap) > 1:
+        node1 = heapq.heappop(heap)
+        node2 = heapq.heappop(heap)
 
-    return counter
+        merged = Node(None, node1.freq + node2.freq, node1, node2)
+        heapq.heappush(heap, merged)
 
+    return heap[0]
 
-def build_tree(counter):
-    q = PriorityQueue()
-    for symbol, freq in counter.items():
-        q.put(Node(freq, symbol))
-
-    while q.qsize() > 1:
-        l = q.get()
-        r = q.get()
-        node = Node(l.freq + r.freq, None, l, r)
-        q.put(node)
-
-    return q.get()
-
-
-def build_codes(node, binary_string='', coding={}):
+def build_huffman_dict(node, binary_string='', huffman_dict={}):
     if node is None:
         return
-    if node.symbol is not None:
-        coding[node.symbol] = binary_string
+
+    if node.char is not None:
+        huffman_dict[node.char] = binary_string
         return
-    build_codes(node.left, binary_string + '0', coding)
-    build_codes(node.right, binary_string + '1', coding)
-    return coding
 
+    build_huffman_dict(node.left, binary_string + '0', huffman_dict)
+    build_huffman_dict(node.right, binary_string + '1', huffman_dict)
 
-def huffman_encode(filename, output):
-    """
-    Encodes an image using Huffman coding and saves the result to a file.
+    return huffman_dict
 
-    Args:
-        filename (str): The name of the image file to encode.
-        output (str): The name of the file to save the encoded image to.
+def image_to_string(image_path):
+    image = Image.open(image_path)
+    pixels = list(image.getdata())
+    image_string = ''.join(color_to_char_map[pixel[:3]] for pixel in pixels)
 
-    Usage:
-        >>> huffman_encode('input.png', 'output.bin')
+    root = build_huffman_tree(image_string)
+    huffman_dict = build_huffman_dict(root)
 
-    """
-    freq = calc_freq(filename)
-    root = build_tree(freq)
-    codes = build_codes(root)
+    encoded_string = ''.join(huffman_dict[char] for char in image_string)
 
-    img = Image.open(filename)
-    pixels = img.load()
+    return encoded_string, huffman_dict
 
-    with open(output, 'wb') as file:
-        bits = bitarray.bitarray()
-        for i in range(img.size[0]):
-            for j in range(img.size[1]):
-                pixel = pixels[i, j]
-                bits.extend(codes[pixel])
-        bits.tofile(file)
+def string_to_image(image_string, huffman_dict, output_path):
+    reverse_huffman_dict = {v: k for k, v in huffman_dict.items()}
 
-def huffman_decode(filename, output, root, size):
-    """
-    Decodes an image using Huffman coding and saves the result to a file.
+    decoded_string = ''
+    temp = ''
+    for bit in image_string:
+        temp += bit
+        if temp in reverse_huffman_dict:
+            decoded_string += reverse_huffman_dict[temp]
+            temp = ''
 
-    Args:
-        filename (str): The name of the file to decode.
-        output (str): The name of the file to save the decoded image to.
-        root (Node): The root node of the Huffman tree.
-        size (tuple): The size of the image to decode.
+    pixels = [char_to_color_map[char] for char in decoded_string]
+    image = Image.new('RGB', (32, 32))
+    image.putdata(pixels)
+    image.save(output_path)
 
-    Usage:
-        >>> huffman_decode('output.bin', 'decoded.png', root, (32, 32))
-
-    """
-    with open(filename, 'rb') as file:
-        bits = bitarray.bitarray()
-        bits.fromfile(file)
-        bits = bits.to01()
-
-    img = Image.new('RGBA', size)
-    pixels = img.load()
-
-    i = j = pos = 0
-    while pos < len(bits):
-        node = root
-        while node.symbol is None:
-            if bits[pos] == '0':
-                node = node.left
-            else:
-                node = node.right
-            pos += 1
-        pixels[i, j] = node.symbol
-
-        j += 1
-        if j == size[0]:
-            i += 1
-            j = 0
-
-    img.save(output)
 
 def compress_map_assets():
     """
@@ -131,8 +106,38 @@ def compress_map_assets():
     for map_name in os.listdir(MAP_ASSETS_DIR):
         if map_name.endswith(".png"):
             print("Compressing map: {}".format(map_name))
-            huffman_encode(os.path.join(MAP_ASSETS_DIR, map_name), os.path.join(MAP_ASSETS_DIR, map_name.replace(".png", ".bin")))
+            
+            # Convert image to Huffman encoded string
+            image_string, huffman_dict = image_to_string(os.path.join(MAP_ASSETS_DIR, map_name))
+
+            # Save the huffman dictionary for later use
+            with open(
+                os.path.join(MAP_ASSETS_DIR, f"huffman_dict_{map_name.replace('.png', '')}.pkl"), 'wb'
+            ) as f:
+                pickle.dump(huffman_dict, f)
+
+            # Save the compressed string
+            with open(os.path.join(MAP_ASSETS_DIR, f"compressed_{map_name.replace('.png', '')}"), 'wb') as f:
+                f.write(image_string.encode('utf-8'))
+                
+
+def decompress_map(map_name):
+    """
+    Decompress a map using the huffman dictionary
+    """
+    print("Decompressing map: {}".format(map_name))
+    with open(
+        os.path.join(MAP_ASSETS_DIR, f"huffman_dict_{map_name.replace('.png', '')}.pkl"), 'rb'
+    ) as f:
+        huffman_dict = pickle.load(f)
+
+    with open(os.path.join(MAP_ASSETS_DIR, f"compressed_{map_name.replace('.png', '')}"), 'rb') as f:
+        compressed_string = f.read()
+
+    string_to_image(compressed_string.decode('utf-8'), huffman_dict, os.path.join(MAP_ASSETS_DIR, f'a_decompressed_{map_name}'))
+
 
 
 if __name__ == '__main__':
-    compress_map_assets()
+    #compress_map_assets()
+    decompress_map('map_2.png')
