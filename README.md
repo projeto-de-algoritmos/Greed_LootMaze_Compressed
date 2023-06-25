@@ -13,6 +13,7 @@
 
 Apresentação - https://youtu.be/lZwX_OYJVIM
 
+Arquivo do video: https://github.com/projeto-de-algoritmos/Greed_LootMaze_Compressed/blob/03ec4998a2e8b04e2c7c1bdf6803fba23b15619f/Apresenta%C3%A7%C3%A3o%20-%20Greed%20-%20LootMaze%20Compressed.mp4
 
 ## 💡 Atenção!!!!
 
